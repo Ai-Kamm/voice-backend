@@ -23,7 +23,7 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'Text is required' });
     }
 
-    const selectedVoiceId = voice_id || '21m00Tcm4TlvDq8ikWAM';
+    const selectedVoiceId = voice_id || 'pNInz6obpgDQGcFmaJgB';
     const apiKey = process.env.ELEVENLABS_API_KEY;
 
     if (!apiKey) {
