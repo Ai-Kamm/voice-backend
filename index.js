@@ -23,7 +23,6 @@ app.post('/api/tts', async (req, res) => {
       return res.status(400).json({ error: 'Text is required' });
     }
 
-    // Дефолтный голосок (например, Rachel или любой твой ID)
     const selectedVoiceId = voice_id || '21m00Tcm4TlvDq8ikWAM';
     const apiKey = process.env.ELEVENLABS_API_KEY;
 
