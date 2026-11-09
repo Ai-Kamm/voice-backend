@@ -59,6 +59,40 @@ app.post('/api/tts', async (req, res) => {
   }
 });
 
+// Эндпоинт для распознавания речи через Deepgram (Speech-to-Text)
+app.post('/api/stt', express.raw({ type: ['audio/*', 'application/octet-stream', 'multipart/form-data'], limit: '10mb' }), async (req, res) => {
+  try {
+    const audioBuffer = req.body;
+    
+    if (!audioBuffer || audioBuffer.length === 0) {
+      return res.status(400).json({ error: 'Audio file is required in request body' });
+    }
+
+    const apiKey = process.env.DEEPGRAM_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'DEEPGRAM_API_KEY is missing in environment variables' });
+    }
+
+    const response = await axios.post(
+      'https://api.deepgram.com/v1/listen?model=nova-2&language=ru',
+      audioBuffer,
+      {
+        headers: {
+          'Authorization': `Token ${apiKey}`,
+          'Content-Type': req.headers['content-type'] || 'audio/mp3'
+        }
+      }
+    );
+
+    const transcript = response.data.results?.channels[0]?.alternatives[0]?.transcript || '';
+    res.json({ transcript });
+
+  } catch (error) {
+    console.error('Deepgram Error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to transcribe audio' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
