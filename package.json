@@ -9,7 +9,8 @@
   "dependencies": {
     "express": "^4.19.2",
     "dotenv": "^16.4.5",
-    "axios": "^1.6.8"
+    "axios": "^1.6.8",
+    "livekit-server-sdk": "^2.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
