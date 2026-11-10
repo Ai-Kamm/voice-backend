@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const dotenv = require('dotenv');
+const { AccessToken } = require('livekit-server-sdk');
 
 dotenv.config();
 
@@ -90,6 +91,45 @@ app.post('/api/stt', express.raw({ type: ['audio/*', 'application/octet-stream',
   } catch (error) {
     console.error('Deepgram Error:', error.response?.data || error.message);
     res.status(500).json({ error: 'Failed to transcribe audio' });
+  }
+});
+
+// Эндпоинт для генерации токена LiveKit (видеозвонки в реальном времени)
+app.get('/api/token', async (req, res) => {
+  try {
+    const roomName = req.query.room || 'zoom-room-1';
+    const participantName = req.query.username || 'User_' + Math.floor(Math.random() * 1000);
+
+    const apiKey = process.env.LIVEKIT_API_KEY;
+    const apiSecret = process.env.LIVEKIT_API_SECRET;
+    const wsUrl = process.env.LIVEKIT_URL;
+
+    if (!apiKey || !apiSecret || !wsUrl) {
+      return res.status(500).json({ error: 'LiveKit credentials are missing on server' });
+    }
+
+    const at = new AccessToken(apiKey, apiSecret, {
+      identity: participantName,
+    });
+    
+    at.addGrant({ 
+      roomJoin: true, 
+      room: roomName, 
+      canPublish: true, 
+      canSubscribe: true 
+    });
+
+    const token = await at.toJwt();
+
+    res.json({
+      token,
+      wsUrl,
+      roomName,
+      participantName
+    });
+  } catch (error) {
+    console.error('Error generating LiveKit token:', error);
+    res.status(500).json({ error: 'Failed to generate token' });
   }
 });
 
